@@ -1,0 +1,12 @@
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/bin/Debug/net7.0/SimbirGo.Entities.deps.json
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/bin/Debug/net7.0/SimbirGo.Entities.dll
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/bin/Debug/net7.0/SimbirGo.Entities.pdb
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.AssemblyInfoInputs.cache
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.AssemblyInfo.cs
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.csproj.CoreCompileInputs.cache
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.dll
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/refint/SimbirGo.Entities.dll
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.pdb
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/ref/SimbirGo.Entities.dll
+/Users/ruslan.m/RiderProjects/SImbir.Go/SimbirGo.Entities/obj/Debug/net7.0/SimbirGo.Entities.csproj.AssemblyReference.cache
