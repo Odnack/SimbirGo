@@ -1,14 +1,12 @@
 using System.Net;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Simbir.Go.DataAccess.Extensions;
 using Simbir.Go.DataAccess.Helpers;
 using Simbir.Go.DataAccess.Repositories;
-using Simbir.GO.Entities.DbEntities;
-using Simbir.GO.Entities.Models;
+using Simbir.GO.Entities.Models.User;
 using Simbir.GO.Entities.OperationResults;
 
 namespace Simbir.GO.Controllers;

@@ -4,6 +4,7 @@ using Simbir.Go.DataAccess.Context;
 using Simbir.Go.DataAccess.Helpers;
 using Simbir.GO.Entities.DbEntities;
 using Simbir.GO.Entities.Models;
+using Simbir.GO.Entities.Models.User;
 using Simbir.GO.Entities.OperationResults;
 
 namespace Simbir.Go.DataAccess.Repositories;

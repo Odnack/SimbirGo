@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using Simbir.GO.Entities.Models;
+using Simbir.GO.Entities.Models.User;
 using Simbir.GO.Entities.OperationResults;
 
 namespace Simbir.Go.DataAccess.Helpers;

@@ -9,7 +9,7 @@ public class PostgresContext : DbContext
         DbContextOptions<PostgresContext> options) : base(options)
     {
     }
-    
+    public DbSet<Transport> Transports { get; set; }
     public DbSet<User> Users { get; set; }
     
 }
