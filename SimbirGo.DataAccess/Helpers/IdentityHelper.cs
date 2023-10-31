@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Claims;
-using Simbir.GO.Entities.Models;
 using Simbir.GO.Entities.Models.User;
 using Simbir.GO.Entities.OperationResults;
 
@@ -8,10 +7,10 @@ namespace Simbir.Go.DataAccess.Helpers;
 
 public class IdentityHelper
 {
-    public OperationResult<UserGetModel> GetCurrentUser(ClaimsIdentity? identity)
+    public OperationResult<UserInfoModel> GetCurrentUser(ClaimsIdentity? identity)
     {
         if (identity == null)
-            return new OperationResult<UserGetModel>(HttpStatusCode.BadRequest);
+            return new OperationResult<UserInfoModel>(HttpStatusCode.BadRequest);
 
         var userClaims = identity.Claims;
         var id = Guid.Empty;
@@ -30,7 +29,7 @@ public class IdentityHelper
             }
         }
 
-        return new OperationResult<UserGetModel>(new UserGetModel(id, userName, userRole));
+        return new OperationResult<UserInfoModel>(new UserInfoModel(id, userName, userRole));
     }
 
 }

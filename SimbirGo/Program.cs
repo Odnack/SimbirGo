@@ -66,6 +66,7 @@ builder.Services.AddScoped<HashHelper>();
 builder.Services.AddScoped<TokenHelper>();
 builder.Services.AddScoped<IdentityHelper>();
 builder.Services.AddScoped<TransportRepository>();
+builder.Services.AddScoped<RentRepository>();
 
 var app = builder.Build();
 

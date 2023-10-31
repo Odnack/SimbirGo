@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Simbir.Go.DataAccess.Context;
@@ -11,9 +12,11 @@ using Simbir.Go.DataAccess.Context;
 namespace Simbir.Go.DataAccess.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    partial class PostgresContextModelSnapshot : ModelSnapshot
+    [Migration("20231030192242_AddTable_Transport")]
+    partial class AddTable_Transport
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,39 +24,6 @@ namespace Simbir.Go.DataAccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Simbir.GO.Entities.DbEntities.Rent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("EndRent")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double?>("Price")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("RentType")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("StartRent")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("TransportId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TransportId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Rents");
-                });
 
             modelBuilder.Entity("Simbir.GO.Entities.DbEntities.Transport", b =>
                 {
@@ -124,25 +94,6 @@ namespace Simbir.Go.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Simbir.GO.Entities.DbEntities.Rent", b =>
-                {
-                    b.HasOne("Simbir.GO.Entities.DbEntities.Transport", "Transport")
-                        .WithMany()
-                        .HasForeignKey("TransportId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Simbir.GO.Entities.DbEntities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Transport");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Simbir.GO.Entities.DbEntities.Transport", b =>

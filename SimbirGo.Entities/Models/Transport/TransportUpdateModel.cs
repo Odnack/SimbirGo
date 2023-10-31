@@ -1,6 +1,6 @@
 namespace Simbir.GO.Entities.Models.Transport;
 
-public record class UpdateTransportModel
+public record TransportUpdateModel
 (
     bool CanBeRented, string Model, string Color,
     string Identifier, string? Description, double Latitude, 

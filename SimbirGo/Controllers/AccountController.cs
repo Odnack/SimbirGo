@@ -40,7 +40,7 @@ public class AccountController : ControllerBase
         if (!userResult.Success)
             return userResult.AsActionResult();
         
-        var response = new OperationResult<UserGetModel>(new UserGetModel(userResult.Value.Id, userResult.Value.Username,
+        var response = new OperationResult<UserInfoModel>(new UserInfoModel(userResult.Value.Id, userResult.Value.Username,
             userResult.Value.Role.ToString()));
         return response.AsActionResult();
     }

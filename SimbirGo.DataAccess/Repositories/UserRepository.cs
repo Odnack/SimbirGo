@@ -69,7 +69,7 @@ public class UserRepository
 
         userResult.Value.Username = userModel.Username;
         userResult.Value.Password = _hashHelper.GetHash(userModel.Password);
-        _context.Update(userResult.Value);
+        _context.Users.Update(userResult.Value);
         await _context.SaveChangesAsync();
         return new OperationResult(HttpStatusCode.OK);
     }

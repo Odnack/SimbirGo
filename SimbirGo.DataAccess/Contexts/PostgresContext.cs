@@ -11,5 +11,5 @@ public class PostgresContext : DbContext
     }
     public DbSet<Transport> Transports { get; set; }
     public DbSet<User> Users { get; set; }
-    
+    public DbSet<Rent> Rents { get; set; }
 }

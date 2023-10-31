@@ -32,7 +32,7 @@ public class TransportController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult> Add(AddTransportModel model)
+    public async Task<ActionResult> Add(TransportAddModel model)
     {
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         var claimsData = _identityHelper.GetCurrentUser(identity);
@@ -45,7 +45,7 @@ public class TransportController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult> Update(Guid id, [FromBody] UpdateTransportModel model)
+    public async Task<ActionResult> Update(Guid id, [FromBody] TransportUpdateModel model)
     {
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         var claimsData = _identityHelper.GetCurrentUser(identity);
