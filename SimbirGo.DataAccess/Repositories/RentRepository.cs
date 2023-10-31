@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Simbir.Go.DataAccess.Context;
@@ -53,12 +54,13 @@ public class RentRepository
         }
     }
 
-    public async Task<OperationResult<RentInfoModel>> GetRent(Func<Rent, bool> filter)
+    public async Task<OperationResult<RentInfoModel>> GetRent(Guid userId, Guid rentId)
     {
         try
         {
             var rent = await _context.Rents
-                .FirstOrDefaultAsync(x => filter(x));
+                .FirstOrDefaultAsync(x =>
+                    (x.Transport.UserId == userId || x.UserId == userId) && x.Id == rentId);
 
             if (rent == null)
                 return new OperationResult<RentInfoModel>(HttpStatusCode.BadRequest);
@@ -72,12 +74,31 @@ public class RentRepository
         }
     }
 
-    public async Task<OperationResult<List<RentInfoModel>>> GetRentHistory(Func<Rent, bool> filter)
+    public async Task<OperationResult<RentInfoModel>> GetRent(Guid rentId)
     {
         try
         {
             var rent = await _context.Rents
-                .Where(x => filter(x))
+                .FirstOrDefaultAsync(x => x.Id == rentId);
+
+            if (rent == null)
+                return new OperationResult<RentInfoModel>(HttpStatusCode.BadRequest);
+            return new OperationResult<RentInfoModel>(new RentInfoModel(rent.UserId, rent.StartRent,
+                rent.EndRent, rent.TransportId, rent.Price, rent.RentType.ToString()));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<RentInfoModel>(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult<List<RentInfoModel>>> GetRentHistory(Guid userId)
+    {
+        try
+        {
+            var rent = await _context.Rents
+                .Where(x => x.UserId == userId)
                 .Select(x => new RentInfoModel(x.UserId, x.StartRent,
                     x.EndRent, x.TransportId, x.Price, x.RentType.ToString()))
                 .ToListAsync();
@@ -93,12 +114,33 @@ public class RentRepository
         }
     }
 
-    public async Task<OperationResult<List<RentInfoModel>>> GetTransportHistory(Func<Rent, bool> filter)
+    public async Task<OperationResult<List<RentInfoModel>>> GetTransportHistory(Guid userId, Guid transportId)
     {
         try
         {
             var rent = await _context.Rents
-                .Where(x => filter(x))
+                .Where(x => x.Transport.UserId == userId && x.TransportId == transportId)
+                .Select(x => new RentInfoModel(x.UserId, x.StartRent,
+                    x.EndRent, x.TransportId, x.Price, x.RentType.ToString()))
+                .ToListAsync();
+
+            return rent == null
+                ? new OperationResult<List<RentInfoModel>>(HttpStatusCode.BadRequest)
+                : new OperationResult<List<RentInfoModel>>(rent);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<List<RentInfoModel>>(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult<List<RentInfoModel>>> GetTransportHistory(Guid transportId)
+    {
+        try
+        {
+            var rent = await _context.Rents
+                .Where(x => x.TransportId == transportId)
                 .Select(x => new RentInfoModel(x.UserId, x.StartRent,
                     x.EndRent, x.TransportId, x.Price, x.RentType.ToString()))
                 .ToListAsync();
@@ -180,16 +222,80 @@ public class RentRepository
         }
     }
 
-    public async Task<OperationResult> End(Func<Rent, bool> filter, RentEndModel model)
+    public async Task<OperationResult> End(Guid userId, Guid rentId, RentEndModel model)
     {
         try
         {
             var rent = await _context.Rents
                 .Include(x => x.Transport)
                 .Include(x => x.User)
-                .FirstOrDefaultAsync(x => filter(x));
+                .FirstOrDefaultAsync(x => x.UserId == userId && x.Id == rentId);
 
-            return await EndRent(rent, model);
+            if (rent == null)
+                return new OperationResult(HttpStatusCode.BadRequest);
+            rent.EndRent = DateTimeOffset.UtcNow;
+            var transport = rent.Transport;
+            transport.Longitude = model.Longitude;
+            transport.Latitude = model.Latitude;
+            transport.CanBeRented = true;
+
+            if (rent.PriceOfUnit.HasValue)
+            {
+                rent.Price = rent.RentType switch
+                {
+                    RentType.Days => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Days, 1),
+                    RentType.Minutes => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Minutes, 1),
+                    _ => 0
+                };
+                rent.User.Money -= rent.Price!.Value;
+            }
+
+            _context.Users.Update(rent.User);
+            _context.Rents.Update(rent);
+            _context.Transports.Update(transport);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<List<RentInfoModel>>(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult> End(Guid rentId, RentEndModel model)
+    {
+        try
+        {
+            var rent = await _context.Rents
+                .Include(x => x.Transport)
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Id == rentId);
+
+            if (rent == null)
+                return new OperationResult(HttpStatusCode.BadRequest);
+            rent.EndRent = DateTimeOffset.UtcNow;
+            var transport = rent.Transport;
+            transport.Longitude = model.Longitude;
+            transport.Latitude = model.Latitude;
+            transport.CanBeRented = true;
+
+            if (rent.PriceOfUnit.HasValue)
+            {
+                rent.Price = rent.RentType switch
+                {
+                    RentType.Days => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Days, 1),
+                    RentType.Minutes => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Minutes, 1),
+                    _ => 0
+                };
+                rent.User.Money -= rent.Price!.Value;
+            }
+
+            _context.Users.Update(rent.User);
+            _context.Rents.Update(rent);
+            _context.Transports.Update(transport);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
         }
         catch (Exception e)
         {
@@ -240,33 +346,5 @@ public class RentRepository
             Console.WriteLine(e);
             return new OperationResult<List<RentInfoModel>>(HttpStatusCode.InternalServerError);
         }
-    }
-
-    private async Task<OperationResult> EndRent(Rent? rent, RentEndModel model)
-    {
-        if (rent == null)
-            return new OperationResult(HttpStatusCode.BadRequest);
-        rent.EndRent = DateTimeOffset.UtcNow;
-        var transport = rent.Transport;
-        transport.Longitude = model.Longitude;
-        transport.Latitude = model.Latitude;
-        transport.CanBeRented = true;
-
-        if (rent.PriceOfUnit.HasValue)
-        {
-            rent.Price = rent.RentType switch
-            {
-                RentType.Days => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Days, 1),
-                RentType.Minutes => rent.PriceOfUnit * Math.Max((rent.StartRent - rent.EndRent.Value).Minutes, 1),
-                _ => 0
-            };
-            rent.User.Money -= rent.Price!.Value;
-        }
-
-        _context.Users.Update(rent.User);
-        _context.Rents.Update(rent);
-        _context.Transports.Update(transport);
-        await _context.SaveChangesAsync();
-        return new OperationResult(HttpStatusCode.OK);
     }
 }
