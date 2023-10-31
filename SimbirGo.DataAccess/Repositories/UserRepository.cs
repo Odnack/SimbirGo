@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Simbir.Go.DataAccess.Context;
 using Simbir.Go.DataAccess.Helpers;
 using Simbir.GO.Entities.DbEntities;
-using Simbir.GO.Entities.Models;
 using Simbir.GO.Entities.Models.User;
 using Simbir.GO.Entities.OperationResults;
 
@@ -22,61 +21,187 @@ public class UserRepository
 
     public async Task<OperationResult<User>> Get(UserModel userModel)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userModel.Username);
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userModel.Username);
 
-        if (user != null
-            && _hashHelper.Verify(userModel.Password, user.Password))
-            return new OperationResult<User>(user);
+            if (user != null
+                && _hashHelper.Verify(userModel.Password, user.Password))
+                return new OperationResult<User>(user);
 
-        return new OperationResult<User>(HttpStatusCode.BadRequest);
+            return new OperationResult<User>(HttpStatusCode.BadRequest);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<User>(HttpStatusCode.InternalServerError);
+        }
     }
 
     public async Task<OperationResult<User>> Get(Guid id)
     {
-        var user = await _context.Users.FindAsync(id);
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
 
-        return user == null
-            ? new OperationResult<User>(HttpStatusCode.BadRequest)
-            : new OperationResult<User>(user);
+            return user == null
+                ? new OperationResult<User>(HttpStatusCode.BadRequest)
+                : new OperationResult<User>(user);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<User>(HttpStatusCode.InternalServerError);
+        }
     }
 
     public async Task<OperationResult> Add(UserModel userModel)
     {
-        if (await IsUserExist(userModel))
-            return new OperationResult(HttpStatusCode.BadRequest);
-
-        var user = new User
+        try
         {
-            Username = userModel.Username,
-            Password = _hashHelper.GetHash(userModel.Password),
-            Role = Role.User
-        };
-        await _context.Users.AddAsync(user);
-        await _context.SaveChangesAsync();
-        return new OperationResult(HttpStatusCode.OK);
+            if (await IsUserExist(userModel.Username))
+                return new OperationResult(HttpStatusCode.BadRequest);
+
+            var user = new User
+            {
+                Username = userModel.Username,
+                Password = _hashHelper.GetHash(userModel.Password),
+                Role = Role.User
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult(HttpStatusCode.InternalServerError);
+        }
     }
 
     public async Task<OperationResult> Update(Guid id, UserModel userModel)
     {
-        var userResult = await Get(id);
+        try
+        {
+            var userResult = await Get(id);
 
-        if (userResult.Value.Username != userModel.Username && await IsUserExist(userModel))
-            return new OperationResult(HttpStatusCode.BadRequest);
+            if (userResult.Value.Username != userModel.Username && await IsUserExist(userModel.Username))
+                return new OperationResult(HttpStatusCode.BadRequest);
 
-        if (!userResult.Success)
-            return userResult;
+            if (!userResult.Success)
+                return userResult;
 
 
-        userResult.Value.Username = userModel.Username;
-        userResult.Value.Password = _hashHelper.GetHash(userModel.Password);
-        _context.Users.Update(userResult.Value);
-        await _context.SaveChangesAsync();
-        return new OperationResult(HttpStatusCode.OK);
+            userResult.Value.Username = userModel.Username;
+            userResult.Value.Password = _hashHelper.GetHash(userModel.Password);
+            _context.Users.Update(userResult.Value);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult(HttpStatusCode.InternalServerError);
+        }
     }
 
-    private async Task<bool> IsUserExist(UserModel userModel)
+    public async Task<OperationResult<List<UserInfoModel>>> Get(int start, int count)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userModel.Username);
+        try
+        {
+            var users = await _context.Users
+                .Skip(start)
+                .Take(count)
+                .Select(x => new UserInfoModel(
+                    x.Id, x.Username, x.Role.ToString(), x.Money))
+                .ToListAsync();
+            return new OperationResult<List<UserInfoModel>>(users);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult<List<UserInfoModel>>(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult> Add(UserAdminModel userModel)
+    {
+        try
+        {
+            if (await IsUserExist(userModel.Username))
+                return new OperationResult(HttpStatusCode.BadRequest);
+
+            var user = new User
+            {
+                Username = userModel.Username,
+                Password = _hashHelper.GetHash(userModel.Password),
+                Role = userModel.IsAdmin
+                    ? Role.Admin
+                    : Role.User,
+                Money = userModel.Balance
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult> Update(Guid id, UserAdminModel userModel)
+    {
+        try
+        {
+            var userResult = await Get(id);
+
+            if (userResult.Value.Username != userModel.Username && await IsUserExist(userModel.Username))
+                return new OperationResult(HttpStatusCode.BadRequest);
+
+            if (!userResult.Success)
+                return userResult;
+
+            var user = userResult.Value;
+
+            user.Username = userModel.Username;
+            user.Password = _hashHelper.GetHash(userModel.Password);
+            user.Role = userModel.IsAdmin
+                ? Role.Admin
+                : Role.User;
+            user.Money = userModel.Balance;
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    public async Task<OperationResult> Delete(Guid id)
+    {
+        try
+        {
+            var user = await _context.Users.FindAsync(id);
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return new OperationResult(HttpStatusCode.OK);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new OperationResult(HttpStatusCode.InternalServerError);
+        }
+    }
+
+    private async Task<bool> IsUserExist(string userName)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == userName);
 
         return user != null;
     }
