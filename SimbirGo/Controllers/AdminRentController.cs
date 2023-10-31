@@ -22,21 +22,21 @@ public class AdminRentController : ControllerBase
     [HttpGet("Rent/{rentId:guid}")]
     public async Task<ActionResult> Get(Guid rentId)
     {
-        var result = await _rentRepository.GetRent(rentId);
+        var result = await _rentRepository.GetRent(x => x.Id == rentId);
         return result.AsActionResult();
     }
 
     [HttpGet("UserHistory/{userId:guid}")]
     public async Task<ActionResult> UserHistory(Guid userId)
     {
-        var result = await _rentRepository.GetRentHistory(userId);
+        var result = await _rentRepository.GetRentHistory(x => x.UserId == userId);
         return result.AsActionResult();
     }
 
     [HttpGet("TransportHistory/{transportId:guid}")]
     public async Task<ActionResult> TransportHistory(Guid transportId)
     {
-        var result = await _rentRepository.GetTransportHistory(transportId);
+        var result = await _rentRepository.GetTransportHistory(x => x.TransportId == transportId);
         return result.AsActionResult();
     }
 
@@ -50,7 +50,7 @@ public class AdminRentController : ControllerBase
     [HttpPost("Rent/End/{rentId:guid}")]
     public async Task<ActionResult> End(Guid rentId, RentEndModel model)
     {
-        var result = await _rentRepository.End(rentId, model);
+        var result = await _rentRepository.End(x => x.Id == rentId, model);
         return result.AsActionResult();
     }
 

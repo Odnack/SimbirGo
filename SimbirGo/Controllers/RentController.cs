@@ -40,7 +40,8 @@ public class RentController : ControllerBase
         if (!claimsData.Success)
             return claimsData.AsActionResult();
 
-        var rentResult = await _rentRepository.GetRent(claimsData.Value.Id, rentId);
+        var rentResult = await _rentRepository.GetRent(x =>
+            (x.Transport.UserId == claimsData.Value.Id || x.UserId == claimsData.Value.Id) && x.Id == rentId);
         return rentResult.AsActionResult();
     }
 
@@ -52,7 +53,7 @@ public class RentController : ControllerBase
         if (!claimsData.Success)
             return claimsData.AsActionResult();
 
-        var rentResult = await _rentRepository.GetRentHistory(claimsData.Value.Id);
+        var rentResult = await _rentRepository.GetRentHistory(x => x.UserId == claimsData.Value.Id);
         return rentResult.AsActionResult();
     }
 
@@ -64,7 +65,8 @@ public class RentController : ControllerBase
         if (!claimsData.Success)
             return claimsData.AsActionResult();
 
-        var rentResult = await _rentRepository.GetTransportHistory(claimsData.Value.Id, transportId);
+        var rentResult = await _rentRepository.GetTransportHistory(
+            x => x.Transport.UserId == claimsData.Value.Id && x.TransportId == transportId);
         return rentResult.AsActionResult();
     }
 
@@ -88,7 +90,7 @@ public class RentController : ControllerBase
         if (!claimsData.Success)
             return claimsData.AsActionResult();
 
-        var rentResult = await _rentRepository.End(claimsData.Value.Id, rentId, model);
+        var rentResult = await _rentRepository.End(x => x.UserId == claimsData.Value.Id && x.Id == rentId, model);
         return rentResult.AsActionResult();
     }
 }
