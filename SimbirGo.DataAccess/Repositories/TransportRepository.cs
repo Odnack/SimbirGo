@@ -82,7 +82,7 @@ public class TransportRepository
             
             if (transport == null)
                 return new OperationResult(HttpStatusCode.BadRequest);
-            if(Enum.TryParse<TransportType>(model.TransportType, out var transportType))
+            if(!Enum.TryParse<TransportType>(model.TransportType, out var transportType))
                 return new OperationResult(HttpStatusCode.BadRequest);
             transport.UserId = model.OwnerId;
             transport.CanBeRented = model.CanBeRented;

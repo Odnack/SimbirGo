@@ -76,7 +76,7 @@ public class RentController : ControllerBase
         if (!claimsData.Success)
             return claimsData.AsActionResult();
 
-        var rentResult = await _rentRepository.Add(claimsData.Value.Id, transportId, rentType);
+        var rentResult = await _rentRepository.Start(claimsData.Value.Id, transportId, rentType);
         return rentResult.AsActionResult();
     }
 

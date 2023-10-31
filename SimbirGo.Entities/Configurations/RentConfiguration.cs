@@ -13,7 +13,7 @@ public class RentConfiguration : BaseEntityConfiguration<Rent>
 
         builder.Property(x => x.StartRent)
             .IsRequired();
-
+        
         builder.Property(x => x.TransportId)
             .IsRequired();
         

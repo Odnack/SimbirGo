@@ -28,10 +28,13 @@ namespace Simbir.Go.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("EndRent")
+                    b.Property<DateTimeOffset?>("EndRent")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<double?>("Price")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("PriceOfUnit")
                         .HasColumnType("double precision");
 
                     b.Property<int>("RentType")
