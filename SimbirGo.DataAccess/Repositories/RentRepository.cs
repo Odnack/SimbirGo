@@ -22,11 +22,24 @@ public class RentRepository
     {
         try
         {
+            if (!Enum.TryParse<TransportRentType>(transportModel.Type, out var type))
+                return new OperationResult<List<TransportInfoModel>>(HttpStatusCode.BadRequest);
+
+            var transportType = type switch
+            {
+                TransportRentType.Bike => TransportType.Bike,
+                TransportRentType.Car => TransportType.Car,
+                TransportRentType.Scooter => TransportType.Scooter,
+                TransportRentType.All => default
+            };
+
             var transports = await _context.Transports.Where(x =>
                     Math.Acos(Math.Sin(x.Latitude * 0.0175) * Math.Sin(transportModel.Latitude * 0.0175)
                         + Math.Cos(x.Latitude * 0.0175) * Math.Cos(transportModel.Latitude * 0.0175) *
                         Math.Cos(transportModel.Longitude * 0.0175) - x.Longitude * 0.0175) * 3959 <=
-                    transportModel.Radius)
+                    transportModel.Radius &&
+                    (type == TransportRentType.All || x.TransportType == transportType) &&
+                    x.CanBeRented)
                 .Select(x => new TransportInfoModel(x.CanBeRented, x.TransportType.ToString(), x.Model, x.Color,
                     x.Identifier, x.Description, x.Latitude, x.Longitude,
                     x.MinutePrice, x.DayPrice, x.UserId, x.Id))
@@ -71,9 +84,9 @@ public class RentRepository
                     x.EndRent, x.TransportId, x.Price, x.RentType.ToString()))
                 .ToListAsync();
 
-            if (rent == null)
-                return new OperationResult<List<RentInfoModel>>(HttpStatusCode.BadRequest);
-            return new OperationResult<List<RentInfoModel>>(rent);
+            return rent == null 
+                ? new OperationResult<List<RentInfoModel>>(HttpStatusCode.BadRequest) 
+                : new OperationResult<List<RentInfoModel>>(rent);
         }
         catch (Exception e)
         {
@@ -92,9 +105,9 @@ public class RentRepository
                     x.EndRent, x.TransportId, x.Price, x.RentType.ToString()))
                 .ToListAsync();
 
-            if (rent == null)
-                return new OperationResult<List<RentInfoModel>>(HttpStatusCode.BadRequest);
-            return new OperationResult<List<RentInfoModel>>(rent);
+            return rent == null
+                ? new OperationResult<List<RentInfoModel>>(HttpStatusCode.BadRequest)
+                : new OperationResult<List<RentInfoModel>>(rent);
         }
         catch (Exception e)
         {
@@ -123,7 +136,8 @@ public class RentRepository
                 UserId = userId,
                 RentType = type
             });
-
+            transport.CanBeRented = false;
+            _context.Transports.Update(transport);
             await _context.SaveChangesAsync();
             return new OperationResult(HttpStatusCode.OK);
         }
@@ -149,6 +163,7 @@ public class RentRepository
             var transport = rent.Transport;
             transport.Longitude = model.Longitude;
             transport.Latitude = model.Latitude;
+            transport.CanBeRented = true;
             var price = rent.RentType switch
             {
                 RentType.Days => transport.DayPrice,

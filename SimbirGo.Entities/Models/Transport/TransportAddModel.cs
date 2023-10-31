@@ -1,5 +1,3 @@
-using Simbir.GO.Entities.DbEntities;
-
 namespace Simbir.GO.Entities.Models.Transport;
 
 public record TransportAddModel
