@@ -89,5 +89,6 @@ public class RentController : ControllerBase
             return claimsData.AsActionResult();
 
         var rentResult = await _rentRepository.End(claimsData.Value.Id, rentId, model);
-        return rentResult.AsActionResult();    }
+        return rentResult.AsActionResult();
+    }
 }

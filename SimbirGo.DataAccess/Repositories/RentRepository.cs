@@ -140,6 +140,7 @@ public class RentRepository
         {
             var rent = await _context.Rents
                 .Include(x => x.Transport)
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.Id == rentId);
 
             if (rent == null)
@@ -160,10 +161,12 @@ public class RentRepository
                 {
                     RentType.Days => price * Math.Max((rent.StartRent - rent.EndRent).Days, 1),
                     RentType.Minutes => price * Math.Max((rent.StartRent - rent.EndRent).Minutes, 1),
-                    _ => default
+                    _ => 0
                 };
+                rent.User.Money -= rent.Price!.Value;
             }
 
+            _context.Users.Update(rent.User);
             _context.Rents.Update(rent);
             _context.Transports.Update(transport);
             await _context.SaveChangesAsync();

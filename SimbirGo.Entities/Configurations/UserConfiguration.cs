@@ -13,6 +13,9 @@ public class UserConfiguration : BaseEntityConfiguration<User>
         builder.Property(x => x.Password)
             .HasMaxLength(255);
 
+        builder.Property(x => x.Money)
+            .IsRequired();
+        
         builder.HasIndex(x => x.Username)
             .IsUnique();
     }

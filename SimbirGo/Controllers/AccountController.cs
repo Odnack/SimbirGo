@@ -41,7 +41,7 @@ public class AccountController : ControllerBase
             return userResult.AsActionResult();
         
         var response = new OperationResult<UserInfoModel>(new UserInfoModel(userResult.Value.Id, userResult.Value.Username,
-            userResult.Value.Role.ToString()));
+            userResult.Value.Role.ToString(), userResult.Value.Money));
         return response.AsActionResult();
     }
 

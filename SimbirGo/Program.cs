@@ -60,13 +60,16 @@ builder.Services.AddContext(builder.Configuration);
 
 builder.Services.AddScoped<PostgresContext>();
 
-builder.Services.AddScoped<UserRepository>();
-
+//Helpers
 builder.Services.AddScoped<HashHelper>();
 builder.Services.AddScoped<TokenHelper>();
 builder.Services.AddScoped<IdentityHelper>();
+
+//Repositories
 builder.Services.AddScoped<TransportRepository>();
 builder.Services.AddScoped<RentRepository>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<PaymentRepository>();
 
 var app = builder.Build();
 
